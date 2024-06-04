@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Workspace</title>
+    <link rel="icon" href="app_logo.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<div class="container mt-5">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Learn a word</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'main' %}">Main</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <h2>App Workspace</h2>
+    <div class="mb-3">
+        <h3>Learn New Words</h3>
+        <ul class="list-group" id="words-list">
+            <!-- Words will be dynamically inserted here -->
+        </ul>
+    </div>
+    <div class="mb-3">
+        <button class="btn btn-primary" id="get-new-words">Get New Words</button>
+    </div>
+    <div class="mb-4">
+        <input type="text" id="new-word-text" class="form-control mb-2" placeholder="Enter new word">
+        <input type="text" id="new-word-translation" class="form-control mb-2" placeholder="Enter word translation">
+        <button class="btn btn-primary" id="add-word">Add New Word</button>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    var socket = new WebSocket('ws://' + window.location.host + '/ws/words/');
+
+    socket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        $('#words-list').append('<li class="list-group-item">' + data.message + '</li>');
+    };
+
+    $('#add-word').click(function() {
+        const newWordText = $('#new-word-text').val();
+        const newWordTranslation = $('#new-word-translation').val();
+        socket.send(JSON.stringify({ 'message': newWordText + ' - ' + newWordTranslation }));
+        $('#new-word-text').val('');
+        $('#new-word-translation').val('');
+    });
+
+    // Initial load of words
+    function loadWords() {
+        $.ajax({
+            url: '/api/words/',
+            method: 'GET',
+            success: function(data) {
+                $('#words-list').empty();
+                data.forEach(function(word) {
+                    $('#words-list').append('<li class="list-group-item">' + word.text + ' - ' + word.translation + '</li>');
+                });
+            },
+            error: function(error) {
+                console.error('Error fetching words:', error);
+            }
+        });
+    }
+
+    $('#get-new-words').click(loadWords);
+    loadWords();
+});
+</script>
+
+</body>
+</html>

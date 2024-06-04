@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: My English API
+  version: 1.0.0
+  description: API documentation for the My English
+servers:
+  - url: http://127.0.0.1:8000
+paths:
+  /api/words/:
+    get:
+      summary: Get list of words
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    text:
+                      type: string
+                    translation:
+                      type: string
+    post:
+      summary: Create a new word
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                translation:
+                  type: string
+      responses:
+        '201':
+          description: Word created
+  /api/words/{id}/:
+    get:
+      summary: Get a word by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  text:
+                    type: string
+                  translation:
+                    type: string
+        '404':
+          description: Word not found
+    put:
+      summary: Update a word by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                translation:
+                  type: string
+      responses:
+        '200':
+          description: Word updated
+        '404':
+          description: Word not found
+    delete:
+      summary: Delete a word by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Word deleted
+        '404':
+          description: Word not found
